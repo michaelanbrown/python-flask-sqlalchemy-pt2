@@ -42,6 +42,30 @@ def pet_by_id(id):
 
     return response
 
+@app.route('/owner/<int:id>')
+def owner_by_id(id):
+    owner = Owner.query.filter(Owner.id == id).first()
+
+    if not owner:
+        response_body = '<h1>404 owner not found</h1>'
+        response = make_response(response_body, 404)
+        return response
+
+    response_body = f'<h1>Information for {owner.name}</h1>'
+
+    pets = [pet for pet in owner.pets]
+
+    if not pets:
+        response_body += f'<h2>Has no pets at this time.</h2>'
+
+    else:
+        for pet in pets:
+            response_body += f'<h2>Has pet {pet.species} named {pet.name}.</h2>'
+
+    response = make_response(response_body, 200)
+
+    return response
+
 # if __name__ ...
 
 if __name__ == '__main__':
