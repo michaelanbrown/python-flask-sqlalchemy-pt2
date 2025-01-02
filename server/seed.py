@@ -1,33 +1,28 @@
+# server/app.py
+
 #!/usr/bin/env python3
 
-from random import choice as rc
+from flask import Flask, make_response
+from flask_migrate import Migrate
 
-from faker import Faker
+from models import db
 
-from app import app
-from models import db, Owner, Pet
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+migrate = Migrate(app, db)
 
 db.init_app(app)
 
-fake = Faker()
+@app.route('/')
+def index():
+    response = make_response(
+        '<h1>Welcome to the pet/owner directory!</h1>',
+        200
+    )
+    return response
 
-with app.app_context():
+if __name__ == '__main__':
+    app.run(port=5555, debug=True)
 
-    Pet.query.delete()
-    Owner.query.delete()
-
-    owners = []
-    for n in range(50):
-        owner = Owner(name=fake.name())
-        owners.append(owner)
-
-    db.session.add_all(owners)
-
-    pets = []
-    species = ['Dog', 'Cat', 'Chicken', 'Hamster', 'Turtle']
-    for n in range(100):
-        pet = Pet(name=fake.first_name(), species=rc(species), owner=rc(owners))
-        pets.append(pet)
-
-    db.session.add_all(pets)
-    db.session.commit()
